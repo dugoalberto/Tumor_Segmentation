@@ -1,0 +1,9 @@
+# Ignora i file di output di LaTeX
+*.aux
+*.bbl
+*.blg
+*.log
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+.DS_Store

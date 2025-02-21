@@ -25,18 +25,21 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Author Guidelines and template for VCS report}
+\title{BraTS 2020: Brain Tumor Segmentation}
 
-\author{Giovanni muchaca\\
-{\tt\small firstauthor@i1.org}
+\author{Alberto Dugo\\
+{\tt\small alberto.dugo@studenti.unipd.it}
 % For a paper whose authors are all at the same institution,
 % omit the following lines up until the closing ``}''.
 % Additional authors and addresses can be added with ``\and'',
 % just like the second author.
 % To save space, use either the email address or home page, not both
 \and
-Second Author\\
-{\tt\small secondauthor@i2.org}
+Andrea Cecchin\\
+{\tt\small andrea.cecchin.5@studenti.unipd.it}
+\and
+Matteo Soldà\\
+{\tt\small matteo.solda.1@studenti.unipd.it}
 }
 
 \maketitle
@@ -44,13 +47,8 @@ Second Author\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-   The ABSTRACT is to be in fully-justified italicized text, at the top
-   of the left-hand column, below the author and affiliation
-   information. Use the word ``Abstract'' as the title, in 12-point
-   Times, boldface type, centered relative to the column, initially
-   capitalized. The abstract is to be in 10-point, single-spaced type.
-   Leave two blank lines after the Abstract, then begin the main text.
-   Abstract should be no longer than 300 words.
+Brain tumor segmentation and patient survival prediction are critical tasks in medical image analysis, aiding in diagnosis and treatment planning. In this work, we address Task 1 and Task 2 of the BraTS 2020 challenge, focusing on the segmentation of gliomas from multimodal MRI scans and the prediction of overall patient survival. For tumor segmentation, we employ a deep learning approach based on the nnU-Net architecture, leveraging its adaptive preprocessing and training strategies to achieve robust segmentation of the enhancing tumor, peritumoral edema, and necrotic/non-enhancing tumor core. Our model is trained on multi-institutional MRI data, incorporating data augmentation and ensemble techniques to improve generalization.  
+For survival prediction, we extract radiomic features from the segmented tumor regions and integrate them with patient clinical data. A machine learning pipeline, utilizing models such as Random Forests and Gradient Boosting, is employed to predict patient survival in three categories: short-term, mid-term, and long-term. We evaluate our approach using standard BraTS metrics, including Dice score for segmentation and accuracy for survival classification. Preliminary results demonstrate competitive segmentation performance, highlighting the effectiveness of the nnU-Net framework, while survival prediction remains challenging due to the heterogeneity of tumor progression. Future work will explore advanced feature selection and deep learning-based survival models to enhance predictive accuracy.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT

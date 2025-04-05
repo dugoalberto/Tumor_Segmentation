@@ -21,201 +21,109 @@
 
 % Pages are numbered in submission mode, and unnumbered in camera-ready
 %\ifcvprfinal\pagestyle{empty}\fi
-\setcounter{page}{4321}
+\setcounter{page}{1}
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{BraTS 2020: Brain Tumor Segmentation}
-
-\author{Alberto Dugo\\
-{\tt\small alberto.dugo@studenti.unipd.it}
+\title{Multi-Task Neural Network for Brain Tumor Segmentation and Survival Rate Prediction on BraTS Dataset}
+\author{Cecchin Andrea\\
+{\tt\scriptsize andrea.cecchin.5@studenti.unipd.it}\\
 % For a paper whose authors are all at the same institution,
 % omit the following lines up until the closing ``}''.
 % Additional authors and addresses can be added with ``\and'',
 % just like the second author.
 % To save space, use either the email address or home page, not both
 \and
-Andrea Cecchin\\
-{\tt\small andrea.cecchin.5@studenti.unipd.it}
+Dugo Alberto\\
+{\tt\scriptsize alberto.dugo@studenti.unipd.it}\\
 \and
-Matteo Soldà\\
-{\tt\small matteo.solda.1@studenti.unipd.it}
+Soldà Matteo\\
+{\tt\scriptsize matteo.solda.1@studenti.unipd.it}\\
 }
-
 \maketitle
 %\thispagestyle{empty}
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-Brain tumor segmentation and patient survival prediction are critical tasks in medical image analysis, aiding in diagnosis and treatment planning. In this work, we address Task 1 and Task 2 of the BraTS 2020 challenge, focusing on the segmentation of gliomas from multimodal MRI scans and the prediction of overall patient survival. For tumor segmentation, we employ a deep learning approach based on the nnU-Net architecture, leveraging its adaptive preprocessing and training strategies to achieve robust segmentation of the enhancing tumor, peritumoral edema, and necrotic/non-enhancing tumor core. Our model is trained on multi-institutional MRI data, incorporating data augmentation and ensemble techniques to improve generalization.  
-For survival prediction, we extract radiomic features from the segmented tumor regions and integrate them with patient clinical data. A machine learning pipeline, utilizing models such as Random Forests and Gradient Boosting, is employed to predict patient survival in three categories: short-term, mid-term, and long-term. We evaluate our approach using standard BraTS metrics, including Dice score for segmentation and accuracy for survival classification. Preliminary results demonstrate competitive segmentation performance, highlighting the effectiveness of the nnU-Net framework, while survival prediction remains challenging due to the heterogeneity of tumor progression. Future work will explore advanced feature selection and deep learning-based survival models to enhance predictive accuracy.
+In this paper, developed as part of the project for the Vision and Cognitive Systems course within the Master's Degree program in Computer Science at the University of Padua, we present our work on Brain Tumor Segmentation and Survival Prognosis tasks. The presented results were achieved by designing a Deep Neural Network based on the U-Net architecture. This model, trained and evaluated using the BraTS Challenge's dataset, allowed us to generate as output both the segmentation of the tumor region in an MRI scan and a prediction of the patient's survival.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
 \section{Introduction}
+CBTRUS\cite{CBTRUSTumors2022} maintains and regularly updates a registry of malignant and non-malignant brain tumors.
+In global data, the incidence of malignant brain tumors is approximately 3.5 per 100,000 people. This incidence increases to 3.9 for the male population and 3.1 for the female population. This indicates that approximately 173,699 men and 148,032 women are diagnosed with brain tumors each year, for a total of 321,731 individuals. The average annual mortality in the United States alone between 2017 and 2021 was 4.41 per 100,000 people. This represents a death of 17,411 people per year, or 48 deaths per day.
 
-Please follow the guidelines that have been uploaded on Moodle. Remember also that the report should be no longer than six pages (plus references).
 
-\subsection{Language}
-
-All manuscripts must be in English.
-
-\subsection{Suggested Structure}
-
-The following is a suggested structure for your report:
+Brain Tumor Segmentation Challenge is an annual competition, firstly launched by the Perelman School of Medicine\cite{BraTSChallenge} in 2012, focused on evaluating the performance of algorithms in tasks related to the segmentation of brain tumors in multimodal MRI scans. In particular, our work focused on the following tasks proposed by the competition:
 
 \begin{itemize}
-	\item Introduction (10\%): describe the problem you are working on, why it's important, and an overview of your results.
-	\item Related Work (10\%): discuss published work or similar apps that relates to your project. How is your approach similar or different from others?
-	\item Dataset (15\%): describe the data you are working with for your project. What type of data is it? Where did it come from? How much data are you working with? Did you have to do any preprocessing, filtering, etc., and why?
-	\item Method (30\%): discuss your approach for solving the problems that you set up in the introduction. Why is your approach the right thing to do? Did you consider alternative approaches? It may be helpful to include figures, diagrams, or tables to describe your method or compare it with others.
-	\item Experiments (30\%): discuss the experiments that you performed. The exact experiments will vary depending on the project, but you might compare with prior work, perform an ablation study to determine the impact of various components of your system, experiment with different hyperparameters or architectural choices. You should include graphs, tables, or other figures to illustrate your experimental results.
-	\item Conclusion (5\%): summarize your key results; what have you learned? Suggest ideas for future extensions.
-\end{itemize}	
+	\item Segmentation of Gliomas: it is the task of recognizing a tumor region, if present. It requires the segmentation of the three typical regions which characterize a brain tumor:
+    \begin{itemize}
+        \item Enhancing Tumor: it is the region of a brain tumor characterized by the presence of a disrupted blood-brain barrier.
+        \item Peritumoral Edema: it is the swelling of tissue surrounding a brain tumor, caused by the accumulation of fluid.
+        \item Necrotic and Non-Enhancing Tumor Core: it is the central region of a brain tumor that contains dead tissue.
+    \end{itemize}	
+	\item Prediction of Overall Survival: this task involves predicting the survival rate of patients based on their MRI scans.
+\end{itemize}
+
+Being able to correctly identify and classify tumor areas is a highly important task, because it increase the survival rate of patients. Despite that, those tasks are extremely challenging. The difficulty of these tasks, and the reason why tumor segmentations are performed by human experts, lies in the challenge of visualizing certain tumor areas in MRI scans.
+
+Indeed, while peritumoral edema is easily visible even without image preprocessing or contrast modification, the Enhancing Tumor is only visible in post-contrast scans, where it appears brighter. Even more difficult is the segmentation of the Necrotic and Non-Enhancing Tumor Core, which does not show contrast enhancement in MRI scans.
+
+Modeling and training a deep neural network to perform these tasks would decrease the time required to accurately identify tumor regions in MRI scans, potentially increasing the accuracy of human-made segmentations. Additionally, predicting survival rates could be useful in defining an irreversible clinical condition, where tumor segmentations and surgery attempts would be futile.
 
 %------------------------------------------------------------------------
-\section{Formatting your paper}
+\section{Related Works}
 
-All text must be in a two-column format. The total allowable width of the
-text area is $6\frac78$ inches (17.5 cm) wide by $8\frac78$ inches (22.54
-cm) high. Columns are to be $3\frac14$ inches (8.25 cm) wide, with a
-$\frac{5}{16}$ inch (0.8 cm) space between them. The main title (on the
-first page) should begin 1.0 inch (2.54 cm) from the top edge of the
-page. The second and following pages should begin 1.0 inch (2.54 cm) from
-the top edge. On all pages, the bottom margin should be 1-1/8 inches (2.86
-cm) from the bottom edge of the page for $8.5 \times 11$-inch paper; for A4
-paper, approximately 1-5/8 inches (4.13 cm) from the bottom edge of the
-page.
+The most cited work about tumor segmentation made through Deep Learning Networks is the one wirtten by Havaei et Al.\cite{HAVAEI201718} that presents a Convolutional Neural Network that exploits local features and some global contextual features at the same time. This specific model is implemented through a fully connected layer which allows a 40 fold speed up and a 2-phase training procedure. The overall dice score of this model is of 0.86 (complete regions), 0.86 (core regions) and 0.77 (enhancing tumor regions).
+There is also an article made by Gordillo et Al.\cite{GORDILLO20131426} that explore the state of the art of MRI brain tumor segmentation, comparing various models.
 
 %-------------------------------------------------------------------------
-\subsection{Margins and page numbering}
 
-All printed material, including text, illustrations, and charts, must be kept
-within a print area 6-7/8 inches (17.5 cm) wide by 8-7/8 inches (22.54 cm)
-high.
-Page numbers should be in footer with page numbers, centered and .75
-inches from the bottom of the page and make it start at the correct page
-number rather than the 4321 in the example.  To do this fine the line (around
-line 23)
-\begin{verbatim}
-%\ifcvprfinal\pagestyle{empty}\fi
-\setcounter{page}{4321}
-\end{verbatim}
-where the number 4321 is your assigned starting page.
+\section{Dataset}
 
-Make sure the first page is numbered by commenting out the first page being
-empty on line 46
-\begin{verbatim}
-%\thispagestyle{empty}
-\end{verbatim}
+For this project, we used the official dataset\cite{BraTSdataset} provided for the BraTS Challenge held in 2020, obtained from the Kaggle dataset repository. The data it contains, consisting of the combination of 19 different smaller datasets created using various clinical protocols and scanners, include MRI scans from 494 patients.
 
+For each patient, four different three-dimensional brain scans are provided. T1-weighted MRI is a type of scan that emphasizes the anatomical details of the brain. It provides good contrast between gray matter and white matter, making brain structures clearly visible. T1 contrast-enhancing, on the other hand, is a T1 image acquired after the administration of a gadolinium-based contrast agent. The contrast accumulates in areas with high vascular permeability, such as tumors, which absorb the contrast and appear brighter than the surrounding tissues. The T2 scan highlights water-rich areas, such as edema, while T2-FLAIR, or simply FLAIR (Fluid Attenuated Inversion Recovery), is a variant of T2 in which the cerebrospinal fluid signal is suppressed, allowing better visualization of brain lesions.
 
-%-------------------------------------------------------------------------
-\subsection{Type-style and fonts}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/example_MRI.png}
+    \caption{Example of an MRI scan with FLAIR, T1, T2 and T1 contrast-enhancing.}
+\end{figure}
 
-Wherever Times is specified, Times Roman may also be used. If neither is
-available on your word processor, please use the font closest in
-appearance to Times to which you have access.
+The images provided in the dataset have been preprocessed to facilitate their use. Specifically, all scans have been realigned and resampled to the same voxel size of 1 mm³. Additionally, all non-brain tissues, such as the skull and scalp, have been removed.
 
-MAIN TITLE. Center the title 1-3/8 inches (3.49 cm) from the top edge of
-the first page. The title should be in Times 14-point, boldface type.
-Capitalize the first letter of nouns, pronouns, verbs, adjectives, and
-adverbs; do not capitalize articles, coordinate conjunctions, or
-prepositions (unless the title begins with such a word). Leave two blank
-lines after the title.
+For all patients in the training set, totaling 369, manual segmentations of tumor areas were created, verified, and validated by expert neuroradiologists. These segmentations were used during the training and validation phases of the model as the "ground truth" for the segmentations produced by our neural network.
 
-AUTHOR NAME(s) and AFFILIATION(s) are to be centered beneath the title
-and printed in Times 12-point, non-boldface type. This information is to
-be followed by two blank lines.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/groundtruth_example.png}
+    \caption{A colored version of the manual segmentation provided for a patient in the training set.}
+\end{figure}
 
-The ABSTRACT and MAIN TEXT are to be in a two-column format.
-
-MAIN TEXT. Type main text in 10-point Times, single-spaced. Do NOT use
-double-spacing. All paragraphs should be indented 1 pica (approx. 1/6
-inch or 0.422 cm). Make sure your text is fully justified---that is,
-flush left and flush right. Please do not place any additional blank
-lines between paragraphs.
-
-Figure and table captions should be 9-point Roman type as in
-Table~\ref{mytable}. Short captions should be centred.
-
-\noindent Callouts should be 9-point Helvetica, non-boldface type.
-Initially capitalize only the first word of section titles and first-,
-second-, and third-order headings.
-
-FIRST-ORDER HEADINGS. (For example, {\large \bf 1. Introduction})
-should be Times 12-point boldface, initially capitalized, flush left,
-with one blank line before, and one blank line after.
-
-SECOND-ORDER HEADINGS. (For example, { \bf 1.1. Database elements})
-should be Times 11-point boldface, initially capitalized, flush left,
-with one blank line before, and one after. If you require a third-order
-heading (we discourage it), use 10-point Times, boldface, initially
-capitalized, flush left, preceded by one blank line, followed by a period
-and your text on the same line.
+To complete the dataset, a list of all patients who did not survive the tumor was provided, including their age at the time of death and the number of days from the MRI scans to that day.
 
 %-------------------------------------------------------------------------
-\subsection{Footnotes}
+\section{Method}
 
-Please use footnotes\footnote {This is what a footnote looks like.  It
-often distracts the reader from the main flow of the argument.} sparingly.
-Indeed, try to avoid footnotes altogether and include necessary peripheral
-observations in
-the text (within parentheses, if you prefer, as in this sentence).  If you
-wish to use a footnote, place it at the bottom of the column on the page on
-which it is referenced. Use Times 8-point type, single-spaced.
-
+All text must be in a two-column format. 
 
 %-------------------------------------------------------------------------
-\subsection{References}
+\section{Experiments}
 
-List and number all bibliographical references in 9-point Times,
-single-spaced, at the end of your paper. When referenced in the text,
-enclose the citation number in square brackets, for
-example~\cite{Authors14}.  Where appropriate, include the name(s) of
-editors of referenced books.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{|l|c|}
-\hline
-Method & Frobnability \\
-\hline\hline
-Theirs & Frumpy \\
-Yours & Frobbly \\
-Ours & Makes one's heart Frob\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Results. Ours is better.}
-\label{mytable}
-\end{table}
+All text must be in a two-column format. 
 
 %-------------------------------------------------------------------------
-\subsection{Illustrations, graphs, and photographs}
+\section{Conclusions}
 
-All graphics should be centered.  Please ensure that any point you wish to
-make is resolvable in a printed copy of the paper.  Resize fonts in figures
-to match the font in the body text, and choose line widths which render
-effectively in print.  Many readers (and reviewers), even of an electronic
-copy, will choose to print your paper in order to read it.  You cannot
-insist that they do otherwise, and therefore must not assume that they can
-zoom in to see tiny details on a graphic.
+All text must be in a two-column format. 
 
-When placing figures in \LaTeX, it's almost always best to use
-\verb+\includegraphics+, and to specify the  figure width as a multiple of
-the line width as in the example below
-{\small\begin{verbatim}
-   \usepackage[dvips]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]
-                   {myfile.eps}
-\end{verbatim}
-}
-
+%-------------------------------------------------------------------------
 
 {\small
 \bibliographystyle{ieee_fullname}
-\bibliography{egbib}
+\bibliography{bibliography}
 }
 
 \end{document}

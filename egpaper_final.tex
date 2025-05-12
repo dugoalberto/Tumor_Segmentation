@@ -105,11 +105,29 @@ For all patients in the training set, totaling 369, manual segmentations of tumo
 To complete the dataset, a list of all patients who did not survive the tumor was provided, including their age at the time of death and the number of days from the MRI scans to that day.
 
 %-------------------------------------------------------------------------
+
 \section{Method}
+Our model implements a customized 3D U-Net architecture specifically designed for volumetric brain tumor segmentation in multimodal MRI scans.
 
-All text must be in a two-column format. 
+\subsection{Architecture}
+We developed an improved 3D U-Net variant with an exceptionally lightweight structure, optimized for efficient tumor subregion delineation. The network is designed to be as compact as possible while preserving high segmentation accuracy. It comprises a total of 340,596 parameters, corresponding to approximately 1.30 MB of memory during inference (assuming 32-bit floating-point precision).
+The architecture features three resolution levels in the encoder path and a corresponding symmetric decoder path, connected via skip connections to preserve spatial information. The encoder is composed of sequential blocks that capture hierarchical features through $3\times3\times3$ convolutions, followed by Instance Normalization and LeakyReLU activations. Downsampling between resolution levels is implemented using 3D max pooling with a stride of 2.
+Each encoder block adopts a residual-like structure, with dual convolutional layers that facilitate improved gradient flow during training. The decoder path restores spatial resolution using 3D transposed convolutions (kernel size 2, stride 2) for upsampling. Features from the encoder are concatenated with the upsampled representations via skip connections, effectively combining low-level spatial details with high-level semantic features. Dynamic padding is applied to ensure precise spatial alignment during concatenation.
+To mitigate overfitting, a dropout layer with a rate of $0.3$ is inserted prior to the final $1\times1\times1$ convolutional layer, which maps feature representations to the output segmentation classes. Model weights are initialized using Kaiming initialization, which is well-suited for networks employing LeakyReLU activations.
+The network produces probability maps for four target classes (background and three tumor subregions), while preserving the original spatial dimensions of the input volume. This architecture achieves a strong balance between computational efficiency and segmentation performance, making it well-suited for clinical deployment, especially in resource-constrained environments.
 
-%-------------------------------------------------------------------------
+\subsection{Input Preparation}
+Our model processes the full 3D volumetric MRI scans from the BraTS 2020 dataset. Each input sample consists of four co-registered modalities (T1, T1ce, T2, and FLAIR) with dimensions $4 \times 240 \times 240 \times 155$, where the first dimension represents the input channels. Prior to feeding the data into our network, we applied intensity normalization independently for each modality using z-score standardization, ensuring each modality had zero mean and unit variance within the brain region.
+
+To address memory constraints while preserving the volumetric context essential for accurate segmentation, 
+we implemented patch-based processing during both training and inference. 
+%--------TO UNDERSTAND IF IT IS IN THIS WAY--------
+%We extracted overlapping sub-volumes of size $4 \times 128 \times 128 \times 64$ with a stride of 32 voxels along each spatial dimension. This approach allows our network to capture sufficient 3D contextual information while maintaining computational feasibility.
+%For dataset partitioning, we employed a patient-level stratified split, allocating 80\% of cases to the training set and 20\% to the validation set while ensuring balanced distribution of tumor types and volumes across partitions.
+
+\subsection{Loss Function}
+
+
 \section{Experiments}
 
 All text must be in a two-column format. 

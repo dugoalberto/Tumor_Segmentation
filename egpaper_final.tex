@@ -104,7 +104,7 @@ For all patients in the training set, totaling 369, manual segmentations of tumo
 \section{Method}
 Our model implements a customized 3D U-Net architecture specifically designed for volumetric brain tumor segmentation in multimodal MRI scans.
 
-\subsection{Architecture}
+\subsection{Architecture} \label{Architecture}
 We developed an improved 3D U-Net variant with an exceptionally lightweight structure, optimized for efficient tumor subregion delineation. The network is designed to be as compact as possible while preserving high segmentation accuracy. It comprises a total of 340,596 parameters, corresponding to approximately 1.30 MB of memory during inference (assuming 32-bit floating-point precision).
 
 The architecture features three resolution levels in the encoder path and a corresponding symmetric decoder path, connected via skip connections to preserve spatial information. The encoder is composed of sequential blocks that capture hierarchical features through $3\times3\times3$ convolutions, followed by Instance Normalization and LeakyReLU activations. Downsampling between resolution levels is implemented using 3D max pooling with a stride of 2.
@@ -130,7 +130,7 @@ we implemented patch-based processing during both training and inference.
 %We extracted overlapping sub-volumes of size $4 \times 128 \times 128 \times 64$ with a stride of 32 voxels along each spatial dimension. This approach allows our network to capture sufficient 3D contextual information while maintaining computational feasibility.
 %For dataset partitioning, we employed a patient-level stratified split, allocating 80\% of cases to the training set and 20\% to the validation set while ensuring balanced distribution of tumor types and volumes across partitions.
 
-\subsection{Loss Function}
+\subsection{Loss Function} \label{loss_function}
 The entire training phase of our 3D U-Net is based on the use of a combined loss function. Specifically, we employed a loss function that integrates both the Cross-Entropy Loss, contributing 70\% to the final loss value, and a Dice Loss weighted at 30\%.
 
 The Dice Loss used in our implementation is a differentiable (soft) variant of the Dice Similarity Coefficient, or Dice Score. Instead of relying on hard class assignments, it operates on class probabilities obtained after applying a softmax function to the model’s output logits. It is computed independently for each class across the entire batch, and then averaged.
@@ -156,6 +156,41 @@ By combining both losses, we leverage the strengths of each: the fine-grained di
 
 
 \section{Experiments}
+
+\subsection{Architectural choices}
+
+The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score.
+In particular, two additional, more complex architectures were developed, trained, and evaluated on the same dataset.
+
+The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other.
+
+The second alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one.
+
+The decision to test models with varying numbers of parameters was made in an effort to investigate the correlation between model performance, in terms of the Dice Score of the predicted segmentations compared to the ground truth masks, and model complexity, with the aim of identifying the optimal trade-off.
+
+The model evaluation phase was carried out by splitting the training dataset into a training set and a validation set, using the former to train the models and the latter to assess performance in terms of Dice Score and loss function. In particular, in order to accelerate this phase, all the models were trained using a subset of slices for each MRI scans.
+
+Interestingly, despite significant differences in depth and number of parameters, the tested architectures yielded models with consistently strong and highly comparable performance in terms of  Dice Similarity Coefficient for segmentation prediction.
+For this reason, the architecture with 340,596 parameters was preferred, as it offered the best trade-off between performance and computational complexity. In parallel with these experiments, different combinations of weights for Cross-Entropy and Dice Loss were attempted, leading to the final combined loss already presented in section \ref{loss_function}.
+
+\subsection{Training}
+The training process was designed to ensure stability, performance, and efficiency throughout all epochs. The model was trained using a supervised learning setup on all slices comprising the 3D MRI scans of our dataset, with paired input MRI slices and their corresponding segmentation masks as ground truth. The training loop incorporated several best practices to optimize learning and prevent overfitting or gradient-related issues, such as early stopping to avoid overfitting and gradient clipping to mitigate the risk of exploding gradients.
+
+After every forward pass, predictions is extracted from the model outputs and compared with the ground truth segmentation, computing loss and Dice Score to evaluate segmentation performance for each batch. The average Dice Score and training loss is computed over the entire epoch to monitor learning progress.
+
+The validation phase follows the same structure, evaluating the model on a separate validation set using the same loss function and Dice metric.
+
+To prevent overfitting, early stopping is implemented. The validation loss is monitored across epochs, and training is terminated early if the loss did not improve beyond a minimum threshold for a predefined number of consecutive epochs.
+
+During training, model checkpoints are periodically saved every 5 epochs to allow for recovery and future analysis. In addition, a separate checkpoint is saved whenever the model achieved a new highest Dice Score on the validation set. This best-performing model, based on validation performance, is retained and ultimately selected for evaluation on the test set, ensuring that only the most effective model in terms of segmentation quality is actually used for the final inference.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{img/training4mb.png}
+    \caption{Progression of Loss, Dice Score and learning rate over training epochs.}
+\end{figure}
+
+\subsection{Results}
 
 All text must be in a two-column format. 
 

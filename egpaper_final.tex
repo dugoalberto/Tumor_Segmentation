@@ -25,7 +25,7 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Multi-Task Neural Network for Brain Tumor Segmentation and Survival Rate Prediction on BraTS Dataset}
+\title{Improved 3D U-Net for Brain Tumor Segmentation on BraTS Dataset}
 \author{Cecchin Andrea\\
 {\tt\scriptsize andrea.cecchin.5@studenti.unipd.it}\\
 % For a paper whose authors are all at the same institution,
@@ -45,7 +45,7 @@ Soldà Matteo\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-    This paper presents a unified deep learning framework based on the U-Net architecture for the simultaneous tasks of brain tumor segmentation and survival prognosis. Utilizing the publicly available BraTS Challenge dataset for training and evaluation, the proposed model leverages multimodal MRI data to generate precise segmentations of tumor regions and to predict patient survival duration. By addressing these two critical challenges in clinical oncology within a single architecture, the approach demonstrates the potential of integrated deep learning solutions for comprehensive and clinically relevant analysis of brain tumors.
+    This paper presents a deep learning framework based on the U-Net architecture for the task of brain tumor segmentation. Utilizing the publicly available BraTS Challenge dataset for training and evaluation, the proposed model leverages multimodal MRI data to generate precise segmentations of tumor regions. By addressing this critical challenge in clinical oncology within a single architecture, the approach demonstrates the potential of integrated deep learning solutions for comprehensive and clinically relevant analysis of brain tumors.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
@@ -54,23 +54,20 @@ CBTRUS\cite{CBTRUSTumors2022} maintains and regularly updates a registry of mali
 In global data, the incidence of malignant brain tumors is approximately 3.5 per 100,000 people. This incidence increases to 3.9 for the male population and 3.1 for the female population. This indicates that approximately 173,699 men and 148,032 women are diagnosed with brain tumors each year, for a total of 321,731 individuals. The average annual mortality in the United States alone between 2017 and 2021 was 4.41 per 100,000 people. This represents a death of 17,411 people per year, or 48 deaths per day.
 
 
-Brain Tumor Segmentation Challenge is an annual competition, firstly launched by the Perelman School of Medicine\cite{BraTSChallenge} in 2012, focused on evaluating the performance of algorithms in tasks related to the segmentation of brain tumors in multimodal MRI scans. In particular, our work focused on the following tasks proposed by the competition:
+Brain Tumor Segmentation Challenge is an annual competition, firstly launched by the Perelman School of Medicine\cite{BraTSChallenge} in 2012, focused on evaluating the performance of algorithms in tasks related to the segmentation of brain tumors in multimodal MRI scans. In particular, our work focused on the segmentation of gliomas, which is the task of recognizing a tumor region if present.
 
-\begin{itemize}
-	\item Segmentation of Gliomas: it is the task of recognizing a tumor region, if present. It requires the segmentation of the three typical regions which characterize a brain tumor:
+It requires the segmentation of the three typical regions which characterize a brain tumor:
     \begin{itemize}
         \item Enhancing Tumor: it is the region of a brain tumor characterized by the presence of a disrupted blood-brain barrier.
         \item Peritumoral Edema: it is the swelling of tissue surrounding a brain tumor, caused by the accumulation of fluid.
         \item Necrotic and Non-Enhancing Tumor Core: it is the central region of a brain tumor that contains dead tissue.
-    \end{itemize}	
-	\item Prediction of Overall Survival: this task involves predicting the survival rate of patients based on their MRI scans.
 \end{itemize}
 
-Being able to correctly identify and classify tumor areas is a highly important task, because it increase the survival rate of patients. Despite that, those tasks are extremely challenging. The difficulty of these tasks, and the reason why tumor segmentations are performed by human experts, lies in the challenge of visualizing certain tumor areas in MRI scans.
+Being able to correctly identify and classify tumor areas is a highly important task, because it increase the survival rate of patients. Despite that, those tasks are extremely challenging. The difficulty, and the reason why tumor segmentations are performed by human experts, lies in the challenge of visualizing certain tumor areas in MRI scans.
 
 Indeed, while peritumoral edema is easily visible even without image preprocessing or contrast modification, the Enhancing Tumor is only visible in post-contrast scans, where it appears brighter. Even more difficult is the segmentation of the Necrotic and Non-Enhancing Tumor Core, which does not show contrast enhancement in MRI scans.
 
-Modeling and training a deep neural network to perform these tasks would decrease the time required to accurately identify tumor regions in MRI scans, potentially increasing the accuracy of human-made segmentations. Additionally, predicting survival rates could be useful in defining an irreversible clinical condition, where tumor segmentations and surgery attempts would be futile.
+Modeling and training a deep neural network to perform these tasks would decrease the time required to accurately identify tumor regions in MRI scans, potentially increasing the accuracy of human-made segmentations.
 
 %------------------------------------------------------------------------
 \section{Related Works}
@@ -88,7 +85,7 @@ For each patient, four different three-dimensional brain scans are provided. T1-
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\linewidth]{img/example_MRI.png}
+    \includegraphics[width=0.55\linewidth]{img/example_MRI.png}
     \caption{Example of an MRI scan with FLAIR, T1, T2 and T1 contrast-enhancing.}
 \end{figure}
 
@@ -98,23 +95,31 @@ For all patients in the training set, totaling 369, manual segmentations of tumo
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{img/groundtruth_example.png}
+    \includegraphics[width=0.65\linewidth]{img/groundtruth_example.png}
     \caption{A colored version of the manual segmentation provided for a patient in the training set.}
 \end{figure}
-
-To complete the dataset, a list of all patients who did not survive the tumor was provided, including their age at the time of death and the number of days from the MRI scans to that day.
 
 %-------------------------------------------------------------------------
 
 \section{Method}
 Our model implements a customized 3D U-Net architecture specifically designed for volumetric brain tumor segmentation in multimodal MRI scans.
 
-\subsection{Architecture}
+\subsection{Architecture} \label{Architecture}
 We developed an improved 3D U-Net variant with an exceptionally lightweight structure, optimized for efficient tumor subregion delineation. The network is designed to be as compact as possible while preserving high segmentation accuracy. It comprises a total of 340,596 parameters, corresponding to approximately 1.30 MB of memory during inference (assuming 32-bit floating-point precision).
+
 The architecture features three resolution levels in the encoder path and a corresponding symmetric decoder path, connected via skip connections to preserve spatial information. The encoder is composed of sequential blocks that capture hierarchical features through $3\times3\times3$ convolutions, followed by Instance Normalization and LeakyReLU activations. Downsampling between resolution levels is implemented using 3D max pooling with a stride of 2.
 Each encoder block adopts a residual-like structure, with dual convolutional layers that facilitate improved gradient flow during training. The decoder path restores spatial resolution using 3D transposed convolutions (kernel size 2, stride 2) for upsampling. Features from the encoder are concatenated with the upsampled representations via skip connections, effectively combining low-level spatial details with high-level semantic features. Dynamic padding is applied to ensure precise spatial alignment during concatenation.
 To mitigate overfitting, a dropout layer with a rate of $0.3$ is inserted prior to the final $1\times1\times1$ convolutional layer, which maps feature representations to the output segmentation classes. Model weights are initialized using Kaiming initialization, which is well-suited for networks employing LeakyReLU activations.
+
 The network produces probability maps for four target classes (background and three tumor subregions), while preserving the original spatial dimensions of the input volume. This architecture achieves a strong balance between computational efficiency and segmentation performance, making it well-suited for clinical deployment, especially in resource-constrained environments.
+
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/architect.png}
+    \caption{A simplified illustration of the developed architecture.}
+\end{figure}
 
 \subsection{Input Preparation}
 Our model processes the full 3D volumetric MRI scans from the BraTS 2020 dataset. Each input sample consists of four co-registered modalities (T1, T1ce, T2, and FLAIR) with dimensions $4 \times 240 \times 240 \times 155$, where the first dimension represents the input channels. Prior to feeding the data into our network, we applied intensity normalization independently for each modality using z-score standardization, ensuring each modality had zero mean and unit variance within the brain region.
@@ -125,10 +130,67 @@ we implemented patch-based processing during both training and inference.
 %We extracted overlapping sub-volumes of size $4 \times 128 \times 128 \times 64$ with a stride of 32 voxels along each spatial dimension. This approach allows our network to capture sufficient 3D contextual information while maintaining computational feasibility.
 %For dataset partitioning, we employed a patient-level stratified split, allocating 80\% of cases to the training set and 20\% to the validation set while ensuring balanced distribution of tumor types and volumes across partitions.
 
-\subsection{Loss Function}
+\subsection{Loss Function} \label{loss_function}
+The entire training phase of our 3D U-Net is based on the use of a combined loss function. Specifically, we employed a loss function that integrates both the Cross-Entropy Loss, contributing 70\% to the final loss value, and a Dice Loss weighted at 30\%.
+
+The Dice Loss used in our implementation is a differentiable (soft) variant of the Dice Similarity Coefficient, or Dice Score. Instead of relying on hard class assignments, it operates on class probabilities obtained after applying a softmax function to the model’s output logits. It is computed independently for each class across the entire batch, and then averaged.
+
+\begin{equation}
+\mathcal{L}_{\text{Dice}} = 1 - \frac{1}{C} \sum_{c=1}^{C} \frac{2 \sum_i p_{c,i} \cdot g_{c,i} + \epsilon}{\sum_i p_{c,i} + \sum_i g_{c,i} + \epsilon}
+\end{equation}
+\textit{where}\\
+$C$\textit{: number of classes;}\\
+$p_{c,i}$\textit{: predicted probability for class c in pixel i;}\\
+$g_{c,i}$\textit{: ground truth probability for class c in pixel i;}\\
+$\epsilon$\textit{: smoothing.}\\
+
+This soft Dice Loss enables a direct and global measure of overlap between the predicted segmentation maps and the corresponding ground truth masks, reflecting how well the predicted regions match the anatomical structures of interest in the MRI scans.
+
+In addition to optimizing spatial agreement, incorporating the Dice Loss into the training objective provides several important benefits. First, it helps mitigate the problem of class imbalance, which is common in medical image segmentation tasks where the target structures, such as tumoral area, often occupy only a small fraction of the image volume. Unlike Cross-Entropy, which gives equal weight to all pixels regardless of class frequency, Dice Loss inherently emphasizes the accurate prediction of underrepresented structures, promoting better performance on small or sparse regions.
+
+By combining both losses, we leverage the strengths of each: the fine-grained discrimination of Cross-Entropy and the region-level accuracy of Dice, ultimately improving the overall performance of the model.
+
+\begin{equation}
+\mathcal{L}_{\text{Combined}} = 0.7 \cdot \mathcal{L}_{\text{CE}} + 0.3 \cdot \mathcal{L}_{\text{Dice}}
+\end{equation}
 
 
 \section{Experiments}
+
+\subsection{Architectural choices}
+
+The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score.
+In particular, two additional, more complex architectures were developed, trained, and evaluated on the same dataset.
+
+The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other.
+
+The second alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one.
+
+The decision to test models with varying numbers of parameters was made in an effort to investigate the correlation between model performance, in terms of the Dice Score of the predicted segmentations compared to the ground truth masks, and model complexity, with the aim of identifying the optimal trade-off.
+
+The model evaluation phase was carried out by splitting the training dataset into a training set and a validation set, using the former to train the models and the latter to assess performance in terms of Dice Score and loss function. In particular, in order to accelerate this phase, all the models were trained using a subset of slices for each MRI scans.
+
+Interestingly, despite significant differences in depth and number of parameters, the tested architectures yielded models with consistently strong and highly comparable performance in terms of  Dice Similarity Coefficient for segmentation prediction.
+For this reason, the architecture with 340,596 parameters was preferred, as it offered the best trade-off between performance and computational complexity. In parallel with these experiments, different combinations of weights for Cross-Entropy and Dice Loss were attempted, leading to the final combined loss already presented in section \ref{loss_function}.
+
+\subsection{Training}
+The training process was designed to ensure stability, performance, and efficiency throughout all epochs. The model was trained using a supervised learning setup on all slices comprising the 3D MRI scans of our dataset, with paired input MRI slices and their corresponding segmentation masks as ground truth. The training loop incorporated several best practices to optimize learning and prevent overfitting or gradient-related issues, such as early stopping to avoid overfitting and gradient clipping to mitigate the risk of exploding gradients.
+
+After every forward pass, predictions is extracted from the model outputs and compared with the ground truth segmentation, computing loss and Dice Score to evaluate segmentation performance for each batch. The average Dice Score and training loss is computed over the entire epoch to monitor learning progress.
+
+The validation phase follows the same structure, evaluating the model on a separate validation set using the same loss function and Dice metric.
+
+To prevent overfitting, early stopping is implemented. The validation loss is monitored across epochs, and training is terminated early if the loss did not improve beyond a minimum threshold for a predefined number of consecutive epochs.
+
+During training, model checkpoints are periodically saved every 5 epochs to allow for recovery and future analysis. In addition, a separate checkpoint is saved whenever the model achieved a new highest Dice Score on the validation set. This best-performing model, based on validation performance, is retained and ultimately selected for evaluation on the test set, ensuring that only the most effective model in terms of segmentation quality is actually used for the final inference.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{img/training4mb.png}
+    \caption{Progression of Loss, Dice Score and learning rate over training epochs.}
+\end{figure}
+
+\subsection{Results}
 
 All text must be in a two-column format. 
 

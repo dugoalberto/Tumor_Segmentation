@@ -150,7 +150,7 @@ By combining both losses, we leverage the strengths of each: the fine-grained di
 
 \section{Experiments}
 
-\subsection{Architectural choices}
+\subsection{Architectural Choices} \label{architectural_choices}
 
 The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score.
 In particular, two additional, more complex architectures were developed, trained, and evaluated on the same dataset.
@@ -184,9 +184,27 @@ During training, model checkpoints are periodically saved every 5 epochs to allo
 \end{figure}
 
 \subsection{Results}
+The proposed encoder-decoder architecture demonstrated substantial effeciveness in automated brain tumor segmentation using 3D MRI imaging data. The model achieved a Dice Score of 0.79 on the validation set, indicating strong overlap between predicted segmentation mask and ground truth annotations. This performance level represent a clinically relevant accuracy threshold in support of human radiologists in identifying and delineating tumor regions.
+The three-class segmentation task presented significant challenges due to the distinct imaging characteristics and spatial relationships between the three tumor subregions.
+The achieved Dice Score places the model within the competitive range of the modern state-of.the-art methods for brain tumor segmentation, that typically reports a score between 0.75 and 0.85.
 
-All text must be in a two-column format. 
+The results of the presented model were evaluated epoch by epoch on the validation set (also because the test set was not available on Kaggle at the time of writing this paper) and compared with the results of the other two architectures presented in section \ref{architectural_choices}.
+As previously mentioned, the final model had a Dice Score of 79\% and some examples are shown in Figure \ref{fig:row-1-column-1} and \ref{fig:row-2-column-1}.
 
+
+\begin{figure} 
+\centering
+\includegraphics[width=0.8\linewidth]{img/row-1-column-1.png}
+\caption{First example of segmentation results on the validation set. The first column shows the predicted segmentation, while the second column shows the ground truth segmentation.}
+\label{fig:row-1-column-1}
+\end{figure}
+
+\begin{figure} 
+\centering
+\includegraphics[width=0.8\linewidth]{img/row-2-column-1.png}
+\caption{Second example of segmentation results on the validation set. The first column shows the predicted segmentation, while the second column shows the ground truth segmentation.}
+\label{fig:row-2-column-1}
+\end{figure}
 %-------------------------------------------------------------------------
 \section{Conclusions}
 

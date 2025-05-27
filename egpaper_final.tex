@@ -209,7 +209,10 @@ As previously mentioned, the final model had a Dice Score of 79\% and some examp
 %-------------------------------------------------------------------------
 \section{Conclusions}
 
-All text must be in a two-column format. 
+This works presents a lightweight 3D U-Net architecture for automated brain tumor segmentation using multimodal MRI data from the BraTS Challenge dataset. The proposed model achieved a Dice Score of 79\% with only 340.596  parameters, demonstrating that effective segmentation performance can be maintained while significalntly reducing computational complexity. The combined loss function approach, integrating Cross-Entropy and Dice Loss with weights respectively of 30\% and 70\% proved effective in addressing class imbalance challenges inherent in medical image segmentation tasks.\\\\
+The clinical relevance of this research could also lead to practical deployment along the support of radiologists and oncologist in the analysis of brain tumors, potentially improving diagnostic accuracy and treatment planning also. The minimal memory footprint of 1.30MB makes the model suitable for integration into existing clinical workflow without requiring specialized hardware infrastructure.\\\\
+Future work should address several key areas for improvement and extension. First of all, validation on diverse clinical datasets beyond BraTS Challenge data would establish the generalizability of the proposed architecture across different imaging protocols and patient populations.\\ Then, the second point, investigation of advanced data augmentation techniques could potentially improve model robustness and performance on edge cases.\\ And lastly, the integration of attention mechanisms within the lightweight framework could enhance the model's ability to focus on critical tumor boundary regions without significantly increasing computational overhead. \\\\
+The development of ensemble methods combining multiple lightweight models could also be investigated to potentially improve overall segmentation accuracy while maintaining computational efficiency. 
 
 %-------------------------------------------------------------------------
 

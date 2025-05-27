@@ -74,6 +74,7 @@ Modeling and training a deep neural network to perform these tasks would decreas
 
 The most cited work about tumor segmentation made through Deep Learning Networks is the one wirtten by Havaei et Al.\cite{HAVAEI201718} that presents a Convolutional Neural Network that exploits local features and some global contextual features at the same time. This specific model is implemented through a fully connected layer which allows a 40 fold speed up and a 2-phase training procedure. The overall dice score of this model is of 0.86 (complete regions), 0.86 (core regions) and 0.77 (enhancing tumor regions).
 There is also an article made by Gordillo et Al.\cite{GORDILLO20131426} that explore the state of the art of MRI brain tumor segmentation, comparing various models.
+In the literature, there are also some works that focus on the segmentation of brain tumors in MRI scans using 3D U-Net architectures \cite{dong2017automatic,bukhari2021e1d3,myronenko2019robust}.
 
 %-------------------------------------------------------------------------
 
@@ -150,7 +151,7 @@ By combining both losses, we leverage the strengths of each: the fine-grained di
 
 \section{Experiments}
 
-\subsection{Architectural choices}
+\subsection{Architectural Choices} \label{architectural_choices}
 
 The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score.
 In particular, two additional, more complex architectures were developed, trained, and evaluated on the same dataset.
@@ -184,13 +185,34 @@ During training, model checkpoints are periodically saved every 5 epochs to allo
 \end{figure}
 
 \subsection{Results}
+The proposed encoder-decoder architecture demonstrated substantial effeciveness in automated brain tumor segmentation using 3D MRI imaging data. The model achieved a Dice Score of 0.79 on the validation set, indicating strong overlap between predicted segmentation mask and ground truth annotations. This performance level represent a clinically relevant accuracy threshold in support of human radiologists in identifying and delineating tumor regions.
+The three-class segmentation task presented significant challenges due to the distinct imaging characteristics and spatial relationships between the three tumor subregions.
+The achieved Dice Score places the model within the competitive range of the modern state-of.the-art methods for brain tumor segmentation, that typically reports a score between 0.75 and 0.85.
 
-All text must be in a two-column format. 
+The results of the presented model were evaluated epoch by epoch on the validation set (also because the test set was not available on Kaggle at the time of writing this paper) and compared with the results of the other two architectures presented in section \ref{architectural_choices}.
+As previously mentioned, the final model had a Dice Score of 79\% and some examples are shown in Figure \ref{fig:row-1-column-1} and \ref{fig:row-2-column-1}.
 
+
+\begin{figure} 
+\centering
+\includegraphics[width=0.8\linewidth]{img/row-1-column-1.png}
+\caption{First example of segmentation results on the validation set. The first column shows the predicted segmentation, while the second column shows the ground truth segmentation.}
+\label{fig:row-1-column-1}
+\end{figure}
+
+\begin{figure} 
+\centering
+\includegraphics[width=0.8\linewidth]{img/row-2-column-1.png}
+\caption{Second example of segmentation results on the validation set. The first column shows the predicted segmentation, while the second column shows the ground truth segmentation.}
+\label{fig:row-2-column-1}
+\end{figure}
 %-------------------------------------------------------------------------
 \section{Conclusions}
 
-All text must be in a two-column format. 
+This works presents a lightweight 3D U-Net architecture for automated brain tumor segmentation using multimodal MRI data from the BraTS Challenge dataset. The proposed model achieved a Dice Score of 79\% with only 340.596  parameters, demonstrating that effective segmentation performance can be maintained while significalntly reducing computational complexity. The combined loss function approach, integrating Cross-Entropy and Dice Loss with weights respectively of 30\% and 70\% proved effective in addressing class imbalance challenges inherent in medical image segmentation tasks.\\\\
+The clinical relevance of this research could also lead to practical deployment along the support of radiologists and oncologist in the analysis of brain tumors, potentially improving diagnostic accuracy and treatment planning also. The minimal memory footprint of 1.30MB makes the model suitable for integration into existing clinical workflow without requiring specialized hardware infrastructure.\\\\
+Future work should address several key areas for improvement and extension. First of all, validation on diverse clinical datasets beyond BraTS Challenge data would establish the generalizability of the proposed architecture across different imaging protocols and patient populations.\\ Then, the second point, investigation of advanced data augmentation techniques could potentially improve model robustness and performance on edge cases.\\ And lastly, the integration of attention mechanisms within the lightweight framework could enhance the model's ability to focus on critical tumor boundary regions without significantly increasing computational overhead. \\\\
+The development of ensemble methods combining multiple lightweight models could also be investigated to potentially improve overall segmentation accuracy while maintaining computational efficiency. 
 
 %-------------------------------------------------------------------------
 

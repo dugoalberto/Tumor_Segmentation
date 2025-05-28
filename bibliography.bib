@@ -84,3 +84,60 @@ year = {2015}
   year={2019},
   organization={Springer}
 }
+
+@article{Ahmad2025liu,
+author = {Ahmad, Jameel and Ksibi, Amel and Alsenan, Shrooq and Arshad, Arfan and Raza, Rehan and Shaikh, Zaffar},
+year = {2025},
+month = {03},
+pages = {e2787},
+title = {LIU-NET: lightweight Inception U-Net for efficient brain tumor segmentation from multimodal 3D MRI images},
+volume = {11},
+journal = {PeerJ Computer Science},
+doi = {10.7717/peerj-cs.2787}
+}
+
+@ARTICLE{Liu2024BTIS,
+  author={Liu, Li and Xia, Kaijian},
+  journal={IEEE Access}, 
+  title={BTIS-Net: Efficient 3D U-Net for Brain Tumor Image Segmentation}, 
+  year={2024},
+  volume={12},
+  number={},
+  pages={133392-133405},
+  abstract={Brain tumor segmentation techniques are essential for the precise delineation of tumors and normal brain tissues which is essential for the guidance of surgical intervention and clinical decisions. However, for resource-constrained clinical environments, more efficient and lightweight segmentation models are needed so that they can be applied in real-time for surgical navigation and clinical decision-making. To tackle this issue, the proposed study introduces a very effective 3D U-Net model that is specifically designed for brain tumor image segmentation. This study presents the primary contributions as follows: 3D depth separable convolution is introduced to decrease the number of model training parameters, hence enhancing the overall efficiency of the model. The dilated dense residual block is designed to expand the sensory field, allowing the network to grasp a broader range of features and structures within the input data. As a result, the model’s performance and generalization ability to handle complex tasks are improved. The integration of the confusion area segmentation module enhances the model’s capability to discern intricate image details and edges, thereby augmenting the overall segmentation efficacy. Evaluation of the proposed BTIS-Net involves experimentation on two widely recognized datasets, namely BraTS 2019 and BraTS 2021. The Dice similarity coefficient, Positive predictive value, and Sensitivity exhibit average improvements of 5.68, 5.38, and 2.14, respectively. Additionally, the Hausdorff distance is reduced by an average of 2.71. The experimental results validate the efficient segmentation performance of the BTIS-Net model, showcasing exceptional outcomes even under resource constraints.},
+  keywords={Image segmentation;Tumors;Brain modeling;Three-dimensional displays;Convolutional neural networks;Magnetic resonance imaging;Solid modeling;Brain cancer;3D U-Net;3D depth separable convolution;brain tumor image segmentation;confusion area segmentation;dilated dense residual block},
+  doi={10.1109/ACCESS.2024.3460797},
+  ISSN={2169-3536},
+  month={},}
+
+  @article{An2024DWKD,
+title = {Dynamic weighted knowledge distillation for brain tumor segmentation},
+journal = {Pattern Recognition},
+volume = {155},
+pages = {110731},
+year = {2024},
+issn = {0031-3203},
+doi = {https://doi.org/10.1016/j.patcog.2024.110731},
+url = {https://www.sciencedirect.com/science/article/pii/S0031320324004825},
+author = {Dianlong An and Panpan Liu and Yan Feng and Pengju Ding and Weifeng Zhou and Bin Yu},
+keywords = {Brain tumor segmentation, MRI, Static knowledge distillation, Dynamic weighted knowledge distillation, Interpretability},
+abstract = {Automatic 3D MRI brain tumor segmentation holds a crucial position in the field of medical image analysis, contributing significantly to the clinical diagnosis and treatment of brain tumors. However, traditional 3D brain tumor segmentation methods often entail extensive parameters and computational demands, posing substantial challenges in model training and deployment. To overcome these challenges, this paper introduces a brain tumor segmentation framework based on knowledge distillation. This framework includes training a lightweight network by extracting knowledge from a well-established brain tumor segmentation network. Firstly, this framework replaces the conventional static knowledge distillation (SKD) with the proposed dynamic weighted knowledge distillation (DWKD). DWKD dynamically adjusts the distillation loss weights for each pixel based on the learning state of the student network. Secondly, to enhance the student network's generalization capability, this paper customizes a loss function for DWKD, known as regularized cross-entropy (RCE). RCE introduces controlled noise into the model, enhancing its robustness and diminishing the risk of overfitting. This controlled injection of noise aids in fortifying the model's robustness. Lastly, Empirical validation of the proposed methodology is conducted using two distinct backbone networks, namely Attention U-Net and Residual U-Net. Rigorous experimentation is executed across the BraTS 2019, BraTS 2020, and BraTS 2021 datasets. Experimental results demonstrate that DWKD exhibits significant advantages over SKD in enhancing the segmentation performance of the student network. Furthermore, when dealing with limited training data, the RCE method can further improve the student network's segmentation performance. Additionally, this paper quantitatively analyzes the number of concept detectors identified in network dissection. It assesses the impact of DWKD on model interpretability and finds that compared to SKD, DWKD can more effectively enhance model interpretability. The source code is available at https://github.com/YuBinLab-QUST/DWKD/.}
+}
+
+@Article{Gutierrez2024Brain,
+AUTHOR = {Hernandez-Gutierrez, Fernando Daniel and Avina-Bravo, Eli Gabriel and Zambrano-Gutierrez, Daniel F. and Almanza-Conejo, Oscar and Ibarra-Manzano, Mario Alberto and Ruiz-Pinales, Jose and Ovalle-Magallanes, Emmanuel and Avina-Cervantes, Juan Gabriel},
+TITLE = {Brain Tumor Segmentation from Optimal MRI Slices Using a Lightweight U-Net},
+JOURNAL = {Technologies},
+VOLUME = {12},
+YEAR = {2024},
+NUMBER = {10},
+ARTICLE-NUMBER = {183},
+URL = {https://www.mdpi.com/2227-7080/12/10/183},
+ISSN = {2227-7080},
+ABSTRACT = {The timely detection and accurate localization of brain tumors is crucial in preserving people’s quality of life. Thankfully, intelligent computational systems have proven invaluable in addressing these challenges. In particular, the UNET model can extract essential pixel-level features to automatically identify the tumor’s location. However, known deep learning-based works usually directly feed the 3D volume into the model, which causes excessive computational complexity. This paper presents an approach to boost the UNET network, reducing computational workload while maintaining superior efficiency in locating brain tumors. This concept could benefit portable or embedded recognition systems with limited resources for operating in real time. This enhancement involves an automatic slice selection from the MRI T2 modality volumetric images containing the most relevant tumor information and implementing an adaptive learning rate to avoid local minima. Compared with the original model (7.7 M parameters), the proposed UNET model uses only 2 M parameters and was tested on the BraTS 2017, 2020, and 2021 datasets. Notably, the BraTS2021 dataset provided outstanding binary metric results: 0.7807 for the Intersection Over the Union (IoU), 0.860 for the Dice Similarity Coefficient (DSC), 0.656 for the Sensitivity, and 0.9964 for the Specificity compared to vanilla UNET.},
+DOI = {10.3390/technologies12100183}
+}
+
+
+
+

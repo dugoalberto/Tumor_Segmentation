@@ -75,6 +75,7 @@ Modeling and training a deep neural network to perform these tasks would decreas
 The most cited work about tumor segmentation made through Deep Learning Networks is the one wirtten by Havaei et Al.\cite{HAVAEI201718} that presents a Convolutional Neural Network that exploits local features and some global contextual features at the same time. This specific model is implemented through a fully connected layer which allows a 40 fold speed up and a 2-phase training procedure. The overall dice score of this model is of 0.86 (complete regions), 0.86 (core regions) and 0.77 (enhancing tumor regions).
 There is also an article made by Gordillo et Al.\cite{GORDILLO20131426} that explore the state of the art of MRI brain tumor segmentation, comparing various models.
 In the literature, there are also some works that focus on the segmentation of brain tumors in MRI scans using 3D U-Net architectures \cite{dong2017automatic,bukhari2021e1d3,myronenko2019robust}.
+Recent models, such as LIU-Net \cite{Ahmad2025liu} and BTIS-Net \cite{Liu2024BTIS} have further explored lightweight 3D U-Net variant with significant reduction in parameters while maintaining competitive performance.
 
 %-------------------------------------------------------------------------
 
@@ -168,13 +169,15 @@ Interestingly, despite significant differences in depth and number of parameters
 For this reason, the architecture with 340,596 parameters was preferred, as it offered the best trade-off between performance and computational complexity. In parallel with these experiments, different combinations of weights for Cross-Entropy and Dice Loss were attempted, leading to the final combined loss already presented in section \ref{loss_function}.
 
 \subsection{Training}
-The training process was designed to ensure stability, performance, and efficiency throughout all epochs. The model was trained using a supervised learning setup on all slices comprising the 3D MRI scans of our dataset, with paired input MRI slices and their corresponding segmentation masks as ground truth. The training loop incorporated several best practices to optimize learning and prevent overfitting or gradient-related issues, such as early stopping to avoid overfitting and gradient clipping to mitigate the risk of exploding gradients.
+The training process was designed to ensure stability, performance, and efficiency throughout all epochs. The model was trained using a supervised learning setup on all slices comprising the 3D MRI scans of our dataset, with paired input MRI slices and their corresponding segmentation masks as ground truth. The training loop incorporated several best practices to optimize learning and prevent overfitting or gradient-related issues, such as early stopping to avoid overfitting and gradient clipping to mitigate the risk of exploding gradients. To improve generalization, data augmentation techniques were applied through albumination, including random rotation and vertical and horizontal flipping, both with a probability of 0.5, which helped the model learn to be invariant to these transformations. This augmentation was applied to both the input MRI slices and their corresponding segmentation masks, ensuring that the model learned robust features.
 
 After every forward pass, predictions is extracted from the model outputs and compared with the ground truth segmentation, computing loss and Dice Score to evaluate segmentation performance for each batch. The average Dice Score and training loss is computed over the entire epoch to monitor learning progress.
 
 The validation phase follows the same structure, evaluating the model on a separate validation set using the same loss function and Dice metric.
 
 To prevent overfitting, early stopping is implemented. The validation loss is monitored across epochs, and training is terminated early if the loss did not improve beyond a minimum threshold for a predefined number of consecutive epochs.
+
+Specifically, we decided to use GradScaler from PyTorch to automatically scale the gradients during backpropagation, which helps prevent numerical instability and allows for larger learning rates. The model was trained using the AdamW optimizer with a starting learning rate of $5e-4$ and a weight decay of $5e-4$. The learning rate was adjusted step-by-step using a ReduceLROnPlateau scheduler, which reduces the learning rate by a factor of 0.5 if the validation loss does not improve for 2 consecutive epochs and fixing a lower bound of $1e-6$. This adaptive learning rate strategy helps the model converge more effectively by allowing it to take larger steps initially and then fine-tune as it approaches a minimum.
 
 During training, model checkpoints are periodically saved every 5 epochs to allow for recovery and future analysis. In addition, a separate checkpoint is saved whenever the model achieved a new highest Dice Score on the validation set. This best-performing model, based on validation performance, is retained and ultimately selected for evaluation on the test set, ensuring that only the most effective model in terms of segmentation quality is actually used for the final inference.
 
@@ -191,6 +194,8 @@ The achieved Dice Score places the model within the competitive range of the mod
 
 The results of the presented model were evaluated epoch by epoch on the validation set (also because the test set was not available on Kaggle at the time of writing this paper) and compared with the results of the other two architectures presented in section \ref{architectural_choices}.
 As previously mentioned, the final model had a Dice Score of 79\% and some examples are shown in Figure \ref{fig:row-1-column-1} and \ref{fig:row-2-column-1}.
+
+Comparing our model directly with other two present in the literature, our performance aligns also with state-of-the-art lightweight methods like those reviewed pattern in \cite{An2024DWKD} and in \cite{Gutierrez2024Brain}, which also achieve competitive results with significantly fewer parameters reporting a Dice Score between 0.75 and 0.82.
 
 
 \begin{figure} 

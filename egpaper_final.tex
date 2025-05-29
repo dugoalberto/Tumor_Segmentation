@@ -154,12 +154,12 @@ By combining both losses, we leverage the strengths of each: the fine-grained di
 
 \subsection{Architectural Choices} \label{architectural_choices}
 
-The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score.
+The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score. This model and its weights are stored on Hugging Face and can be downloaded from the following link: \url{https://huggingface.co/dugoalberto/3D_U_Net_full_slice}.
 In particular, two additional, more complex architectures were developed, trained, and evaluated on the same dataset.
 
-The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other.
+The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other. Also this model is available on Hugging Face at the following link: \url{https://huggingface.co/andreacecchin/vision/tree/main}.
 
-The second alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one.
+The second and last alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one. This last architecture is also available on Hugging Face at the following link: \url{https://huggingface.co/dugoalberto/BratsCVDeeper}.
 
 The decision to test models with varying numbers of parameters was made in an effort to investigate the correlation between model performance, in terms of the Dice Score of the predicted segmentations compared to the ground truth masks, and model complexity, with the aim of identifying the optimal trade-off.
 
@@ -196,6 +196,15 @@ The results of the presented model were evaluated epoch by epoch on the validati
 As previously mentioned, the final model had a Dice Score of 79\% and some examples are shown in Figure \ref{fig:row-1-column-1} and \ref{fig:row-2-column-1}.
 
 Comparing our model directly with other two present in the literature, our performance aligns also with state-of-the-art lightweight methods like those reviewed pattern in \cite{An2024DWKD} and in \cite{Gutierrez2024Brain}, which also achieve competitive results with significantly fewer parameters reporting a Dice Score between 0.75 and 0.82.
+
+In the notebook is also provided the possibility to evaluate separately every single class of the segmentation, which is useful to understand how the model performs on each of the three classes. The result can be seen at Figure \ref{tab:results}.
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{img/SeparatedColor.png}
+\caption{The segmentation results of the model on the validation set, separated by class.}
+\label{tab:results}
+\end{figure}
 
 
 \begin{figure} 

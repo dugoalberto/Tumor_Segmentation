@@ -98,7 +98,7 @@ The images were preprocessed with all scans realigned and resampled to a uniform
 \caption{A colored version of the manual segmentation provided for a patient in the training set.}
 \end{figure}
 
-The dataset was structured for volumetric analysis with input tensors of dimensions $[B, C, H, W, D] = [2, 4, 240, 240, 155]$, where $B$ represents the batch size, $C$ corresponds to the four MRI modalities, and $H \times W \times D$ defines the spatial dimensions. Prior to model input, intensity normalization was applied independently for each modality using z-score standardization, ensuring zero mean and unit variance within the brain region. To address memory constraints while preserving volumetric context essential for accurate segmentation, patch-based processing was implemented during training and inference.
+The dataset was structured for volumetric analysis with input tensors of dimensions $[B, C, H, W, D] = [2, 4, 240, 240, 155]$, where $B$ represents the batch size, $C$ corresponds to the four MRI modalities, and $H \times W \times D$ defines the spatial dimensions. Prior to model input, intensity normalization was applied independently for each modality using z-score standardization, ensuring zero mean and unit variance within the brain region.
 \section{Method}
 Our model implements a customized 3D U-Net architecture specifically designed for volumetric brain tumor segmentation in multimodal MRI scans.
 

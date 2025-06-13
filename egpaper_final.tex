@@ -72,46 +72,48 @@ Modeling and training a deep neural network to perform these tasks would decreas
 %------------------------------------------------------------------------
 \section{Related Works}
 
-The most cited work about tumor segmentation made through Deep Learning Networks is the one wirtten by Havaei et Al.\cite{HAVAEI201718} that presents a Convolutional Neural Network that exploits local features and some global contextual features at the same time. This specific model is implemented through a fully connected layer which allows a 40 fold speed up and a 2-phase training procedure. The overall dice score of this model is of 0.86 (complete regions), 0.86 (core regions) and 0.77 (enhancing tumor regions).
-There is also an article made by Gordillo et Al.\cite{GORDILLO20131426} that explore the state of the art of MRI brain tumor segmentation, comparing various models.
+Over the past decade, deep learning has become the dominant paradigm for brain‐tumor segmentation. Early 2D CNNs such as the cascaded “Two‐Phase” network of Havaei et al.~\cite{HAVAEI201718} achieved an overall Dice of 0.86 for whole‐tumor and tumor‐core regions and 0.77 for enhancing tumor, thanks to its dual‐stream design that fuses local and global context and a two‐stage training scheme. Gordillo et al.~\cite{GORDILLO20131426} provide a comprehensive benchmarking of these early models, highlighting that most fell short on delineating the enhancing core in heterogeneous cases.
+
+With the advent of volumetric architectures, 3D U‐Net variants quickly became the de facto standard. The original 3D U‐Net by Çiçek et al.~\cite{çiçek20163dunetlearningdense} and its nnU‐Net successor by Isensee et al.~\cite{isensee2020nnunetbraintumorsegmentation} demonstrated superior generalization by self‐configuring preprocessing and training pipelines, routinely scoring >0.85 Dice on BraTS~\cite{dong2017automatic,bukhari2021e1d3,myronenko2019robust}. More recent lightweight adaptations, such as LIU‐Net (2021), which reduces parameters via depthwise separable convolutions, and BTIS‐Net (2022), which employs bottleneck blocks and channel pruning—achieve comparable Dice (≈0.84–0.86) with 60–80\% fewer parameters~\cite{Liu2024BTIS,Ahmad2025liu}. Meanwhile, hybrid and transformer‐based models such as Swin‐UNet~\cite{cao2021swinunetunetlikepuretransformer} have begun to close the gap further, offering richer global context modeling at the cost of higher computational overhead. However, there remains a need for architectures that strike an optimal balance between parameter efficiency, inference speed, and segmentation accuracy, especially for resource‐constrained clinical settings.
 
 %-------------------------------------------------------------------------
 
 \section{Dataset}
+For this project, we used the official dataset\cite{BraTSdataset} provided for the BraTS Challenge held in 2020, obtained from the Kaggle dataset repository. The data comprises the combination of 19 different clinical datasets created using various protocols and scanners, encompassing MRI scans from 494 patients.
 
-For this project, we used the official dataset\cite{BraTSdataset} provided for the BraTS Challenge held in 2020, obtained from the Kaggle dataset repository. The data it contains, consisting of the combination of 19 different smaller datasets created using various clinical protocols and scanners, include MRI scans from 494 patients.
-
-For each patient, four different three-dimensional brain scans are provided. T1-weighted MRI is a type of scan that emphasizes the anatomical details of the brain. It provides good contrast between gray matter and white matter, making brain structures clearly visible. T1 contrast-enhancing, on the other hand, is a T1 image acquired after the administration of a gadolinium-based contrast agent. The contrast accumulates in areas with high vascular permeability, such as tumors, which absorb the contrast and appear brighter than the surrounding tissues. The T2 scan highlights water-rich areas, such as edema, while T2-FLAIR, or simply FLAIR (Fluid Attenuated Inversion Recovery), is a variant of T2 in which the cerebrospinal fluid signal is suppressed, allowing better visualization of brain lesions.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.55\linewidth]{img/example_MRI.png}
-    \caption{Example of an MRI scan with FLAIR, T1, T2 and T1 contrast-enhancing.}
-\end{figure}
-
-The images provided in the dataset have been preprocessed to facilitate their use. Specifically, all scans have been realigned and resampled to the same voxel size of 1 mm³. Additionally, all non-brain tissues, such as the skull and scalp, have been removed.
-
-For all patients in the training set, totaling 369, manual segmentations of tumor areas were created, verified, and validated by expert neuroradiologists. These segmentations were used during the training and validation phases of the model as the "ground truth" for the segmentations produced by our neural network.
+For each patient, four different three-dimensional brain scans are provided. T1-weighted MRI emphasizes anatomical details, providing good contrast between gray matter and white matter structures. T1 contrast-enhancing (T1ce) is acquired after gadolinium-based contrast agent administration, where the contrast accumulates in areas with high vascular permeability, causing tumors to appear brighter than surrounding tissues. The T2 scan highlights water-rich areas such as edema, while T2-FLAIR (Fluid Attenuated Inversion Recovery) suppresses cerebrospinal fluid signals, enabling better visualization of brain lesions.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.65\linewidth]{img/groundtruth_example.png}
-    \caption{A colored version of the manual segmentation provided for a patient in the training set.}
+\centering
+\includegraphics[width=0.55\linewidth]{img/example_MRI.png}
+\caption{Example of an MRI scan with FLAIR, T1, T2 and T1 contrast-enhancing.}
 \end{figure}
 
-%-------------------------------------------------------------------------
+The images were preprocessed with all scans realigned and resampled to a uniform voxel size of 1 mm³, and non-brain tissues including skull and scalp were removed. For the 369 patients in the training set, manual segmentations of tumor areas were created, verified, and validated by expert neuroradiologists, serving as ground truth for model training and validation.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\linewidth]{img/groundtruth_example.png}
+\caption{A colored version of the manual segmentation provided for a patient in the training set.}
+\end{figure}
+
+The dataset was structured for volumetric analysis with input tensors of dimensions $[B, C, H, W, D] = [2, 4, 240, 240, 155]$, where $B$ represents the batch size, $C$ corresponds to the four MRI modalities, and $H \times W \times D$ defines the spatial dimensions. Prior to model input, intensity normalization was applied independently for each modality using z-score standardization, ensuring zero mean and unit variance within the brain region.
 \section{Method}
 Our model implements a customized 3D U-Net architecture specifically designed for volumetric brain tumor segmentation in multimodal MRI scans.
 
 \subsection{Architecture} \label{Architecture}
 We developed an improved 3D U-Net variant with an exceptionally lightweight structure, optimized for efficient tumor subregion delineation. The network is designed to be as compact as possible while preserving high segmentation accuracy. It comprises a total of 340,596 parameters, corresponding to approximately 1.30 MB of memory during inference (assuming 32-bit floating-point precision).
 
-The architecture features three resolution levels in the encoder path and a corresponding symmetric decoder path, connected via skip connections to preserve spatial information. The encoder is composed of sequential blocks that capture hierarchical features through $3\times3\times3$ convolutions, followed by Instance Normalization and LeakyReLU activations. Downsampling between resolution levels is implemented using 3D max pooling with a stride of 2.
-Each encoder block adopts a residual-like structure, with dual convolutional layers that facilitate improved gradient flow during training. The decoder path restores spatial resolution using 3D transposed convolutions (kernel size 2, stride 2) for upsampling. Features from the encoder are concatenated with the upsampled representations via skip connections, effectively combining low-level spatial details with high-level semantic features. Dynamic padding is applied to ensure precise spatial alignment during concatenation.
-To mitigate overfitting, a dropout layer with a rate of $0.3$ is inserted prior to the final $1\times1\times1$ convolutional layer, which maps feature representations to the output segmentation classes. Model weights are initialized using Kaiming initialization, which is well-suited for networks employing LeakyReLU activations.
-
-The network produces probability maps for four target classes (background and three tumor subregions), while preserving the original spatial dimensions of the input volume. This architecture achieves a strong balance between computational efficiency and segmentation performance, making it well-suited for clinical deployment, especially in resource-constrained environments.
+The architecture follows an encoder-decoder structure with three resolution levels, 
+connected via skip connections to retain spatial context. Each encoder block applies a 3D convolution (Conv3d) to process volumetric MRI data across spatial and depth dimensions, 
+followed by Instance Normalization and LeakyReLU activation. 
+The network is tailored for the BraTS 2020 dataset, where each input volume, as we mention before, contains four MRI modalities (T1, T1ce, T2, FLAIR), stacked as input channels. 
+The initial Conv3d layer takes this 4-channel input and produces multiple feature maps, capturing localized 3D features relevant to tumor segmentation. 
+Downsampling between levels is performed using 3D max pooling with a stride of 2. The decoder path mirrors the encoder, progressively upsampling and refining features to reconstruct segmentation outputs.
+To mitigate overfitting, a dropout layer with a rate of $0.3$ is inserted prior to the final $1\times1\times1$ convolutional layer, which maps feature representations to the output segmentation classes. 
+Model weights are initialized using Kaiming initialization, which is well-suited for networks employing LeakyReLU activations. 
+Kaiming initialization \cite{He_2015_ICCV} sets the weights of each layer based on the number of input units, specifically drawing from a distribution with variance scaled by $\frac{2}{(1 + a^2)n}$, where $a$ is the negative slope of the LeakyReLU and $n$ is the number of input connections.  
+This architecture demonstrates an excellent trade-off between computational efficiency and segmentation performance. With approximately 340,000 trainable parameters, the network remains lightweight and computationally tractable, making it particularly suitable for deployment in resource-constrained clinical settings. Despite its compact size, the model achieves a Dice score of 79\% on the BraTS 2020 dataset, a remarkable result that underscores the effectiveness of the design in capturing critical volumetric features for brain tumor segmentation.
 
 
 
@@ -121,17 +123,9 @@ The network produces probability maps for four target classes (background and th
     \caption{A simplified illustration of the developed architecture.}
 \end{figure}
 
-\subsection{Input Preparation}
-Our model processes the full 3D volumetric MRI scans from the BraTS 2020 dataset. Each input sample consists of four co-registered modalities (T1, T1ce, T2, and FLAIR) with dimensions $4 \times 240 \times 240 \times 155$, where the first dimension represents the input channels. Prior to feeding the data into our network, we applied intensity normalization independently for each modality using z-score standardization, ensuring each modality had zero mean and unit variance within the brain region.
-
-To address memory constraints while preserving the volumetric context essential for accurate segmentation, 
-we implemented patch-based processing during both training and inference. 
-%--------TO UNDERSTAND IF IT IS IN THIS WAY--------
-%We extracted overlapping sub-volumes of size $4 \times 128 \times 128 \times 64$ with a stride of 32 voxels along each spatial dimension. This approach allows our network to capture sufficient 3D contextual information while maintaining computational feasibility.
-%For dataset partitioning, we employed a patient-level stratified split, allocating 80\% of cases to the training set and 20\% to the validation set while ensuring balanced distribution of tumor types and volumes across partitions.
 
 \subsection{Loss Function} \label{loss_function}
-The entire training phase of our 3D U-Net is based on the use of a combined loss function. Specifically, we employed a loss function that integrates both the Cross-Entropy Loss, contributing 70\% to the final loss value, and a Dice Loss weighted at 30\%.
+The entire training phase of our 3D U-Net is based on the use of a combined loss function. Specifically, we employed a loss function that integrates both the Cross-Entropy Loss, contributing 30\% to the final loss value, and a Dice Loss weighted at 70\%.
 
 The Dice Loss used in our implementation is a differentiable (soft) variant of the Dice Similarity Coefficient, or Dice Score. Instead of relying on hard class assignments, it operates on class probabilities obtained after applying a softmax function to the model’s output logits. It is computed independently for each class across the entire batch, and then averaged.
 
@@ -151,20 +145,20 @@ In addition to optimizing spatial agreement, incorporating the Dice Loss into th
 By combining both losses, we leverage the strengths of each: the fine-grained discrimination of Cross-Entropy and the region-level accuracy of Dice, ultimately improving the overall performance of the model.
 
 \begin{equation}
-\mathcal{L}_{\text{Combined}} = 0.7 \cdot \mathcal{L}_{\text{CE}} + 0.3 \cdot \mathcal{L}_{\text{Dice}}
+\mathcal{L}_{\text{Combined}} = 0.3 \cdot \mathcal{L}_{\text{CE}} + 0.7 \cdot \mathcal{L}_{\text{Dice}}
 \end{equation}
 
 
 \section{Experiments}
 
-\subsection{Architectural choices}
+\subsection{Architectural Choices} \label{architectural_choices}
 
-The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score.
+The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score. This model and its weights are stored on Hugging Face and can be downloaded from the following link: \url{https://huggingface.co/dugoalberto/3D_U_Net_full_slice}.
 In particular, two additional, more complex architectures were developed, trained, and evaluated on the same dataset.
 
-The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other.
+The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other. Also this model is available on Hugging Face at the following link: \url{https://huggingface.co/andreacecchin/vision/tree/main}.
 
-The second alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one.
+The second and last alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one. This last architecture is also available on Hugging Face at the following link: \url{https://huggingface.co/dugoalberto/BratsCVDeeper}.
 
 The decision to test models with varying numbers of parameters was made in an effort to investigate the correlation between model performance, in terms of the Dice Score of the predicted segmentations compared to the ground truth masks, and model complexity, with the aim of identifying the optimal trade-off.
 
@@ -174,13 +168,15 @@ Interestingly, despite significant differences in depth and number of parameters
 For this reason, the architecture with 340,596 parameters was preferred, as it offered the best trade-off between performance and computational complexity. In parallel with these experiments, different combinations of weights for Cross-Entropy and Dice Loss were attempted, leading to the final combined loss already presented in section \ref{loss_function}.
 
 \subsection{Training}
-The training process was designed to ensure stability, performance, and efficiency throughout all epochs. The model was trained using a supervised learning setup on all slices comprising the 3D MRI scans of our dataset, with paired input MRI slices and their corresponding segmentation masks as ground truth. The training loop incorporated several best practices to optimize learning and prevent overfitting or gradient-related issues, such as early stopping to avoid overfitting and gradient clipping to mitigate the risk of exploding gradients.
+The training process was designed to ensure stability, performance, and efficiency throughout all epochs. The model was trained using a supervised learning setup on all slices comprising the 3D MRI scans of our dataset, with paired input MRI slices and their corresponding segmentation masks as ground truth. The training loop incorporated several best practices to optimize learning and prevent overfitting or gradient-related issues, such as early stopping to avoid overfitting and gradient clipping to mitigate the risk of exploding gradients. To improve generalization, data augmentation techniques were applied through albumination, including random rotation and vertical and horizontal flipping, both with a probability of 0.5, which helped the model learn to be invariant to these transformations. This augmentation was applied to both the input MRI slices and their corresponding segmentation masks, ensuring that the model learned robust features.
 
 After every forward pass, predictions is extracted from the model outputs and compared with the ground truth segmentation, computing loss and Dice Score to evaluate segmentation performance for each batch. The average Dice Score and training loss is computed over the entire epoch to monitor learning progress.
 
 The validation phase follows the same structure, evaluating the model on a separate validation set using the same loss function and Dice metric.
 
 To prevent overfitting, early stopping is implemented. The validation loss is monitored across epochs, and training is terminated early if the loss did not improve beyond a minimum threshold for a predefined number of consecutive epochs.
+
+Specifically, we decided to use GradScaler from PyTorch to automatically scale the gradients during backpropagation, which helps prevent numerical instability and allows for larger learning rates. The model was trained using the AdamW optimizer with a starting learning rate of $5e-4$ and a weight decay of $5e-4$. The learning rate was adjusted step-by-step using a ReduceLROnPlateau scheduler, which reduces the learning rate by a factor of 0.5 if the validation loss does not improve for 2 consecutive epochs and fixing a lower bound of $1e-6$. This adaptive learning rate strategy helps the model converge more effectively by allowing it to take larger steps initially and then fine-tune as it approaches a minimum.
 
 During training, model checkpoints are periodically saved every 5 epochs to allow for recovery and future analysis. In addition, a separate checkpoint is saved whenever the model achieved a new highest Dice Score on the validation set. This best-performing model, based on validation performance, is retained and ultimately selected for evaluation on the test set, ensuring that only the most effective model in terms of segmentation quality is actually used for the final inference.
 
@@ -191,13 +187,45 @@ During training, model checkpoints are periodically saved every 5 epochs to allo
 \end{figure}
 
 \subsection{Results}
+The proposed encoder-decoder architecture demonstrated substantial effeciveness in automated brain tumor segmentation using 3D MRI imaging data. The model achieved a Dice Score of 0.79 on the validation set, indicating strong overlap between predicted segmentation mask and ground truth annotations. This performance level represent a clinically relevant accuracy threshold in support of human radiologists in identifying and delineating tumor regions.
+The three-class segmentation task presented significant challenges due to the distinct imaging characteristics and spatial relationships between the three tumor subregions.
+The achieved Dice Score places the model within the competitive range of the modern state-of.the-art methods for brain tumor segmentation, that typically reports a score between 0.75 and 0.85.
 
-All text must be in a two-column format. 
+The results of the presented model were evaluated epoch by epoch on the validation set (also because the test set was not available on Kaggle at the time of writing this paper) and compared with the results of the other two architectures presented in section \ref{architectural_choices}.
+As previously mentioned, the final model had a Dice Score of 79\% and some examples are shown in Figure \ref{fig:row-1-column-1} and \ref{fig:row-2-column-1}.
 
+Comparing our model directly with other two present in the literature, our performance aligns also with state-of-the-art lightweight methods like those reviewed pattern in \cite{An2024DWKD} and in \cite{Gutierrez2024Brain}, which also achieve competitive results with significantly fewer parameters reporting a Dice Score between 0.75 and 0.82.
+
+In the notebook is also provided the possibility to evaluate separately every single class of the segmentation, which is useful to understand how the model performs on each of the three classes. The result can be seen at Figure \ref{tab:results}.
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{img/SeparatedColor.png}
+\caption{The segmentation results of the model on the validation set, separated by class.}
+\label{tab:results}
+\end{figure}
+
+
+\begin{figure} 
+\centering
+\includegraphics[width=0.8\linewidth]{img/row-1-column-1.png}
+\caption{First example of segmentation results on the validation set. The first column shows the predicted segmentation, while the second column shows the ground truth segmentation.}
+\label{fig:row-1-column-1}
+\end{figure}
+
+\begin{figure} 
+\centering
+\includegraphics[width=0.8\linewidth]{img/row-2-column-1.png}
+\caption{Second example of segmentation results on the validation set. The first column shows the predicted segmentation, while the second column shows the ground truth segmentation.}
+\label{fig:row-2-column-1}
+\end{figure}
 %-------------------------------------------------------------------------
 \section{Conclusions}
 
-All text must be in a two-column format. 
+This works presents a lightweight 3D U-Net architecture for automated brain tumor segmentation using multimodal MRI data from the BraTS Challenge dataset. The proposed model achieved a Dice Score of 79\% with only 340.596  parameters, demonstrating that effective segmentation performance can be maintained while significalntly reducing computational complexity. The combined loss function approach, integrating Cross-Entropy and Dice Loss with weights respectively of 30\% and 70\% proved effective in addressing class imbalance challenges inherent in medical image segmentation tasks.\\\\
+The clinical relevance of this research could also lead to practical deployment along the support of radiologists and oncologist in the analysis of brain tumors, potentially improving diagnostic accuracy and treatment planning also. The minimal memory footprint of 1.30MB makes the model suitable for integration into existing clinical workflow without requiring specialized hardware infrastructure.\\\\
+Future work should address several key areas for improvement and extension. First of all, validation on diverse clinical datasets beyond BraTS Challenge data would establish the generalizability of the proposed architecture across different imaging protocols and patient populations.\\ Then, the second point, investigation of advanced data augmentation techniques could potentially improve model robustness and performance on edge cases.\\ And lastly, the integration of attention mechanisms within the lightweight framework could enhance the model's ability to focus on critical tumor boundary regions without significantly increasing computational overhead. \\\\
+The development of ensemble methods combining multiple lightweight models could also be investigated to potentially improve overall segmentation accuracy while maintaining computational efficiency. 
 
 %-------------------------------------------------------------------------
 

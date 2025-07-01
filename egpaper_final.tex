@@ -26,16 +26,16 @@
 
 %%%%%%%%% TITLE
 \title{Improved 3D U-Net for Brain Tumor Segmentation on BraTS Dataset}
-\author{Cecchin Andrea\\
-{\tt\scriptsize andrea.cecchin.5@studenti.unipd.it}\\
+\author{Dugo Alberto\\
+{\tt\scriptsize alberto.dugo@studenti.unipd.it}\\
 % For a paper whose authors are all at the same institution,
 % omit the following lines up until the closing ``}''.
 % Additional authors and addresses can be added with ``\and'',
 % just like the second author.
 % To save space, use either the email address or home page, not both
 \and
-Dugo Alberto\\
-{\tt\scriptsize alberto.dugo@studenti.unipd.it}\\
+Cecchin Andrea\\
+{\tt\scriptsize andrea.cecchin.5@studenti.unipd.it}\\
 \and
 Soldà Matteo\\
 {\tt\scriptsize matteo.solda.1@studenti.unipd.it}\\
@@ -156,15 +156,15 @@ By combining both losses, we leverage the strengths of each: the fine-grained di
 The model architecture selected, as described in section \ref{Architecture}, is the result of extensive experimentation involving several architectures of varying complexity and design. Each model was compared based on its performance in terms of Dice Score. This model and its weights are stored on Hugging Face and can be downloaded from the following link: \url{https://huggingface.co/dugoalberto/3D_U_Net}.
 In particular, two additional, more complex architectures were developed, trained, and evaluated on the same dataset.
 
-The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other. Also this model is available on Hugging Face at the following link: \url{https://huggingface.co/andreacecchin/vision/tree/main}.
+The first alternative architecture was a variant of the final selected one, featuring an additional fourth resolution level in the encoder path and a symmetric decoder. This version retained the same design principles, including skip connections and a residual-like structure for each block. The resulting two models, based on this, comprise a total of 2,867,956 parameters for the smallest version, and 11,465,188 in the other. Also this model is available on Hugging Face at the following link: \url{https://huggingface.co/andreacecchin/Medium_3D_U_Net}.
 
-The second and last alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one. This last architecture is also available on Hugging Face at the following link: \url{https://huggingface.co/dugoalberto/Deep_3D_UNet}.
+The second and last alternative architecture that was developed and tested includes another additional block in the encoder path, resulting in a model with five resolution levels in the encoder and four in the decoder. This architecture was used to generate two models: one that contains a total of 11,536,756 parameters, approximately 34 times more than the selected model, and the other 46,137,060, 135 times the chosen one. This last architecture is also available on Hugging Face at the following link: \url{https://huggingface.co/andreacecchin/Deep_3D_U_Net}.
 
 The decision to test models with varying numbers of parameters was made in an effort to investigate the correlation between model performance, in terms of the Dice Score of the predicted segmentations compared to the ground truth masks, and model complexity, with the aim of identifying the optimal trade-off.
 
-The model evaluation phase was carried out by splitting the training dataset into a training set and a validation set, using the former to train the models and the latter to assess performance in terms of Dice Score and loss function. In particular, in order to accelerate this phase, all the models were trained using a subset of slices for each MRI scans.
+The model evaluation phase was carried out by splitting the training dataset into a training set and a validation set, using the former to train the models and the latter to assess performance in terms of Dice Score and loss function. In particular, in order to accelerate this phase, all the models were trained using a subset of slices for each MRI scans, comparing the resulted scores after 90 epochs.
 
-Interestingly, despite significant differences in depth and number of parameters, the tested architectures yielded models with consistently strong and highly comparable performance in terms of  Dice Similarity Coefficient for segmentation prediction.
+Interestingly, despite the increased depth and number of parameters, the tested architectures did not yield any performance improvements over the lighter alternative, with Dice Similarity Coefficient scores remaining highly comparable across deeper models.
 For this reason, the architecture with 340,596 parameters was preferred, as it offered the best trade-off between performance and computational complexity. In parallel with these experiments, different combinations of weights for Cross-Entropy and Dice Loss were attempted, leading to the final combined loss already presented in section \ref{loss_function}.
 
 \subsection{Training}
